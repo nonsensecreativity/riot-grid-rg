@@ -92,20 +92,16 @@
         this.buttonRights = [];
 
         //options
-        this.listCount = 10; //number of records to be displayed
+        this.listCount = 20; //number of records to be displayed
         this.selectedPage = 0;
         this.gridHeight = '500px';
         this.gridName = 'RiotGrid';
-        this.gridWidth = null;
-        this.allowSelect = true;
-        this.allowDelete = true;
+        this.gridWidth = '100%';
         this.allowAddNew = true;
         this.allowExport = true;
         this.allowSearch = true;
         this.allowFilters = true;
-        this.showRowNo = false;
         this.buttons = [];
-        this.buttonPosition = 'left';
         this.press = false;
         this.moving = false;
         this.key = 'ID';
@@ -335,9 +331,6 @@
                     var s = txt[i].value.toLowerCase();
 
                     if (s.length > 0) {
-
-                        console.log(s);
-
                         self.data = new jinqJs()
                             .from(self.data)
                             .where(function (row) {
@@ -345,9 +338,6 @@
                             }).select();
                     }
                 }
-
-                
-
             }
 
             self.getPages();
