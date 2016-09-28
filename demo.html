@@ -1,4 +1,4 @@
-﻿<!--this is for the data detail-->
+<!--this is for the data detail-->
 <!--some settings-->
 <!--
     
@@ -9,7 +9,7 @@ libs to be included
     <script src="js/mixins.js"></script>
     you can get them directly from links, however, sometime I work offline, so I saved them in my project
     
-usage: 'recommend grid and <rg-cells> are placed in a tag, otherwise, it won't look right in your html file (of cos it still works)
+usage: I recommend grid and <rg-cells> are placed in a tag, otherwise, it won't look right in your html file (of cos it still works)
     this.on('mount', function () {
         var gridTag = self.tags.rg;
         gridTag.loadData(data, options)
@@ -195,7 +195,7 @@ Oops! forgot to tell you that I have a mixins in js/mixins that contains some fu
                 chk: true,
                 emp_id: parseInt(Math.random() * (899999 - 800000) + 80000).toString(),
                 full_name: nouns[parseInt(Math.random() * (nouns.length - 1) + 1)].toUpperCase() + ' ' + adjectives[parseInt(Math.random() * (adjectives.length - 1) + 1)].toUpperCase(),
-                age: Math.random() * (65 - 18) + 18,
+                age: parseInt(Math.random() * (65 - 18) + 18),
                 hired_date: new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())),
                 report_time: parseInt(Math.random() * (24 - 0) + 0).toString() + ':' + parseInt(Math.random() * (60 - 0) + 0).toString(),
                 salary: Math.random() * (100000 - 10000) + 10000,
