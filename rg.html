@@ -324,8 +324,6 @@
                 //get inputs
                 var txt = self.root.getElementsByClassName('input-filter');
                 for (var i = 0; i < txt.length; i++) {
-                    //var n = e.srcElement.dataset.field;
-                    //var s = e.srcElement.value.toLowerCase();
 
                     var n = txt[i].getAttribute('data-field');
                     var s = txt[i].value.toLowerCase();
@@ -553,11 +551,6 @@
             margin-right: 4px;
         }
 
-        .btn-grid, .headerNo {
-            /*width: 50px !important;
-            max-width: 50px !important;*/
-        }
-
         .riotGridHeader, .riotGridBody {
             display: block;
             width: 100%;
@@ -609,14 +602,12 @@
             padding-right: 5px;
         }
 
-        /*using html5 stop fix thead header*/
         .table tbody{
             overflow-y: scroll
         }
 
         .table {
             border-spacing: 0;
-            /*width: 100%;*/
             table-layout: fixed;
         }
 
@@ -632,7 +623,6 @@
                 font-weight: bold;
                 background-color: black;
                 color: yellow;
-                /*height: 100%;*/
             }
 
             .table tr:hover {
@@ -663,24 +653,7 @@
             margin: 0 auto;
         }
 
-        /*.table thead tr{
-            display:block;
-            border: 1px solid black;
-        }
-
-        .table th,table td{
-            width: 100px;
-            border: 1px solid black;
-        }
-
-
-        .table  tbody{
-          display:block;
-          height:200px;
-          overflow:auto;
-        }*/
-
-            
+        
     </style>
 </rg>
 
