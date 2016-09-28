@@ -1,4 +1,4 @@
-﻿<rg>
+<rg>
     <div class="riotGrid">
         <!--panel-->
         <div class="riotGridHeader">
@@ -34,7 +34,7 @@
 
                             <!--filter-->
                             <tr show="{showFilters}">
-                                <th each="{cols}" style="width:{width? width:'50px'}"  data-field="{id}"><input type="text" class="form-control" onkeyup="{filterData}" data-field="{id}" /></th>
+                                <th each="{cols}" style="width:{width? width:'50px'}"  data-field="{id}"><input type="text" class="input-filter" onkeyup="{filterData}" data-field="{id}" /></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -321,18 +321,32 @@
 
         //filter some data
         this.filterData = function (e) {
-            //self.data = self.rawData.slice();
-            if (self.data.length > 0) {
-                var n = e.srcElement.dataset.field;
-                var s = e.srcElement.value.toLowerCase();
+            self.data = self.rawData.slice();
 
-                if (s.length > 0) {
-                    self.data = new jinqJs()
-                        .from(self.data)
-                        .where(function (row) {
-                            return row[n].toString().toLowerCase().indexOf(s) >= 0;
-                        }).select();
+            if (self.data.length > 0) {
+
+                //get inputs
+                var txt = self.root.getElementsByClassName('input-filter');
+                for (var i = 0; i < txt.length; i++) {
+                    //var n = e.srcElement.dataset.field;
+                    //var s = e.srcElement.value.toLowerCase();
+
+                    var n = txt[i].getAttribute('data-field');
+                    var s = txt[i].value.toLowerCase();
+
+                    if (s.length > 0) {
+
+                        console.log(s);
+
+                        self.data = new jinqJs()
+                            .from(self.data)
+                            .where(function (row) {
+                                return row[n].toString().toLowerCase().indexOf(s) >= 0;
+                            }).select();
+                    }
                 }
+
+                
 
             }
 
@@ -446,8 +460,6 @@
                 for (var i = 0; i < self.gridData.length; i++) {
                     self.gridData[i].rowNo =  (self.selectedPage * self.listCount) + i + 1;
                 }
-
-                console.log(JSON.stringify(self.gridData));
             }
 
             self.Item = null;
