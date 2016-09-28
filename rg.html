@@ -1,0 +1,698 @@
+﻿<rg>
+    <div class="riotGrid">
+        <!--panel-->
+        <div class="riotGridHeader">
+            <span if="{allowSearch==true}">
+                <input type="text" id="txtSearch" placeholder="enter text to search" />
+                <button type="button" onclick="{ btnSearchClicked }"><i class="glyphicon glyphicon-search" />&nbsp;Search</button>
+                <button type="button" onclick="{ btnClearSearchClicked }"><i class="glyphicon glyphicon-remove" />&nbsp;Clear</button>
+            </span>
+            <button type="button" if="{allowAddNew==true}" onclick="{ btnAddNewClicked }"><i class="glyphicon glyphicon-plus" />Add New</button>
+            <button type="button" if="{allowExport==true}" onclick="{ btnExportClicked }"><i class="glyphicon glyphicon-export" />&nbsp;Export to CSV</button>
+            <button type="button" onclick="{ btnShowFilters }" if="{allowFilters==true}"
+                    class="btn {btn-info: !showFilters, btn-danger: showFilters} btn-sm">
+                <i class="glyphicon glyphicon-filter" />&nbsp;{showFilters==true? 'Hide Filters': 'Show Filters'}
+            </button>
+
+            <span style="float: right">Total: &nbsp;{formatNumber(data.length)} records</span>
+
+        </div>
+
+        <div class="riotGridBody">
+            <div>
+                <!--<div class="riotGridFixHeader">
+
+                </div>-->
+                <!--body-->
+                <div class="riotGridBodyDetail">
+                    <table class="table tableBody">
+                        <thead>
+                            <!--cols header-->
+                            <tr>
+                                <th each="{cols}" style="width:{width? width:'50px'}"  data-field="{id}"><a data-field="{id}" onclick="{ sortData }">{title}</a></th>
+                            </tr>
+
+                            <!--filter-->
+                            <tr show="{showFilters}">
+                                <th each="{cols}" style="width:{width? width:'50px'}"  data-field="{id}"><input type="text" class="form-control" onkeyup="{filterData}" data-field="{id}" /></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css} {selectedRow: Item[key] == e[key]}" ondblclick="{ rowDbClick }" onclick="{ rowClicked }"></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!--footer-->
+        <div class="riotGridFooter">
+            <div class="btnLeft">
+                <div class="btnGroup" show="{Item}">
+                    <input each="{buttonLefts}" type="button" class="btn-link {css}" data-field="{value}" onclick="{ btnClicked }" value="{btnName}" name="{name}" />
+                </div>
+            </div>
+            <div class="paging">
+                <button type="button" onclick="{ btnFirstRecordClicked }" disabled="{!(selectedPage>0)}">
+                    <strong><<</strong>
+                </button>
+                <button type="button" onclick="{ btnPreRecordClicked }" disabled="{!(selectedPage>0)}">
+                    <strong><</strong>
+                </button>
+                <select id="cboPages" onchange="{ cboPagesChanged }">
+                    <option value="{pageNo}" each="{pages}" selected="{selectedPage==pageNo}">{pageNo+1}</option>
+                </select>
+                <span>/{pages.length}</span>
+                <button type="button" onclick="{ btnNextRecordClicked }" disabled="{!(selectedPage<pages.length-1)}">
+                    <strong>></strong>
+                </button>
+                <button type="button" onclick="{ btnLastRecordClicked }" disabled="{!(selectedPage<pages.length-1)}">
+                    <strong>>></strong>
+                </button>
+            </div>
+            <div class="btnRight">
+                <div class="btnGroup" show="{Item}">
+                    <input each="{buttonRights}" type="button" class="btn-link {css}" data-field="{value}" onclick="{ btnClicked }" value="{btnName}" name="{name}" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        this.cols = [];
+        this.data = [];
+        this.rawData = [];
+        this.gridData = [];
+        this.pages = [];
+        this.sorted = { field: 'ID', sort: 'desc' };
+        this.Item = null;
+        this.showFilters = false;
+        this.rowNoWidth = 30;
+        this.buttonLefts = [];
+        this.buttonRights = [];
+
+        //options
+        this.listCount = 10; //number of records to be displayed
+        this.selectedPage = 0;
+        this.gridHeight = '500px';
+        this.gridName = 'RiotGrid';
+        this.gridWidth = null;
+        this.allowSelect = true;
+        this.allowDelete = true;
+        this.allowAddNew = true;
+        this.allowExport = true;
+        this.allowSearch = true;
+        this.allowFilters = true;
+        this.showRowNo = false;
+        this.buttons = [];
+        this.buttonPosition = 'left';
+        this.press = false;
+        this.moving = false;
+        this.key = 'ID';
+        this.allowResizeCol = false;
+        var self = this;
+        var startX, startWidth, col;
+
+        var self = this;
+
+        this.loadData = function (data, options) {
+            //self.cols = headers;
+
+            //update properties
+            var obj = Object.assign({}, options); //.clone();
+            for (var d in obj) {
+                self[d] = obj[d];
+            }
+
+            //reformat the buttons
+            self.buttonLefts = [];
+            self.buttonRights = [];
+
+            if (self.buttons && self.buttons.length > 0) {
+                self.buttonLefts = new jinqJs()
+                                .from(self.buttons)
+                                .where(function (row) { return row.buttonPosition == null || row.buttonPosition == 'left' })
+                                .select();
+
+
+                self.buttonRights = new jinqJs()
+                                .from(self.buttons)
+                                .where(function (row) { return row.buttonPosition == 'right' })
+                                .select();
+            }
+
+            self.jsonToArray(data);
+            self.update();
+
+        }
+
+        //mouse move and mouse up
+        this.mouseEventInit = function () {
+            if (self.allowResizeCol) {
+                //event of the mouse move
+                this.root.addEventListener("mouseup", function (e) {
+                    if (col != null && self.moving == true && self.press == true) {
+                        col.className = col.className.replace(/resizing/g, '')
+                        self.press = false;
+                        self.moving = false;
+
+                        //update the cols
+                        for (var i in self.cols) {
+                            if (self.cols[i].id == col.getAttribute('data-field')) {
+                                self.cols[i].width = col.style.width;
+                                break;
+                            }
+                        }
+
+                        col = null;
+                    }
+                }, false);
+                this.root.addEventListener("mousemove", function (e) {
+                    if (col) {
+                        if (self.press) {
+                            //set header width
+                            if ((e.pageX - startX) != 0) {
+                                var val = startWidth + (e.pageX - startX);
+                                //col.setAttribute('width', val);
+                                col.style.width = val + 'px';
+                                self.moving = true;
+                                return
+                            }
+
+                        }
+                    }
+                }, false);
+            }
+        }
+
+        //col mousedown
+        this.mousedown = function (e) {
+            if (self.allowResizeCol) {
+                startX = e.pageX;
+                startWidth = e.target.offsetWidth;
+                self.press = true;
+                col = e.target;
+                //col.className = col.className.replace(/resizing/g, '')
+                col.className += ' resizing';
+                self.mouseEventInit();
+            }
+        }
+
+        this.btnAddNewClicked = function () {
+            self.trigger('add', null);
+        }
+
+        //reformat the grid
+        this.reformatGrid = function () {
+            var riotGridBodyDetail = this.root.getElementsByClassName("riotGridBodyDetail")[0];
+            riotGridBodyDetail.style.height = self.gridHeight.toString();
+
+            var tableBody = this.root.getElementsByClassName("tableBody")[0];
+            if (tableBody) {
+                //change the width
+                if (self.gridWidth)
+                    tableBody.style.width = self.gridWidth;
+
+                //assing event to th to allow resize it
+                if (self.allowResizeCol) {
+                    var row = tableBody.getElementsByTagName('tr')[0];
+                    var tr = row;
+                    for (var j in row.childNodes) {
+                        var td = row.childNodes[j];
+                        if (typeof td == 'object' && td.tagName == 'TH') {
+                            td.removeEventListener('mousedown', self.mousedown, false);
+                            td.addEventListener("mousedown", self.mousedown, false);
+                        }
+                    }
+                }
+
+                return;
+            }
+        }
+
+        //on update, collect the cols array and apply it to the header
+        this.on('update', function () {
+            //loops the 1st to get the content of columns
+            if (self.cols.length == 0) {
+                var arr = [];
+                var a = document.getElementsByClassName('tableBody')[0];
+                if (a) {
+                    a = a.getElementsByTagName('tbody')[0];
+                    a = a.getElementsByTagName('tr')[0];
+                    if (a) {
+                        a = a.getElementsByTagName('td');
+                        for (var i = 0; i < a.length; i++) {
+                            var td = a[i];
+                            var obj = {
+                                id: td.getAttribute('data-field'),
+                                width: td.getAttribute('rg-width') ? td.getAttribute('rg-width') : '50px',
+                                title: td.title ? td.title : td.id
+                            }
+                            arr.push(obj);
+                        }
+                        self.cols = arr.slice();
+                    }
+                }
+            }
+        })
+
+        //reformat the grid and the value in td
+        this.on('updated', function () {
+            self.reformatGrid();
+        })
+
+        //get the item from grid base on key value
+        this.item = function (itemKey) {
+            for (var d in self.gridData) {
+                var e = self.gridData[d];
+                if (e[self.key] == itemKey) {
+                    return self.gridData[d];
+                }
+            }
+        }
+
+        //row click event
+        this.rowClicked = function (e) {
+            self.Item = e.item.e;
+            self.trigger('rowClicked', self.Item);
+
+            var obj = e.target;
+
+            var cell = {
+                item: self.Item,
+                cell: obj
+            }
+            self.trigger('cellClicked', cell);
+            if (obj.className && obj.className.toString().toLowerCase().indexOf('rg-checkbox') >= 0) {
+                e.item.e[obj.dataset.field] = !e.item.e[obj.dataset.field];
+                self.trigger('chkClicked', cell);
+            }
+        }
+
+        //row and cell doubleclick
+        this.rowDbClick = function (e) {
+            self.trigger('rowDbClick', self.Item);
+
+            var obj = e.target;
+            var cell = {
+                item: self.Item,
+                cell: obj
+            }
+            self.trigger('cellDbClick', cell);
+        }
+
+        //button clicked
+        this.btnClicked = function (e) {
+            var item = self.Item;
+            if (e.item.type == 'checkbox' || e.item.type == 'radio') {
+                item.checked = e.target.checked;
+            }
+            self.trigger(e.item.triggerName, item);
+        }
+
+        //show filters
+        this.btnShowFilters = function () {
+            if (self.showFilters) {
+                self.data = self.rawData.slice();
+                self.getPages();
+            }
+            self.showFilters = !self.showFilters;
+        }
+
+        //filter some data
+        this.filterData = function (e) {
+            //self.data = self.rawData.slice();
+            if (self.data.length > 0) {
+                var n = e.srcElement.dataset.field;
+                var s = e.srcElement.value.toLowerCase();
+
+                if (s.length > 0) {
+                    self.data = new jinqJs()
+                        .from(self.data)
+                        .where(function (row) {
+                            return row[n].toString().toLowerCase().indexOf(s) >= 0;
+                        }).select();
+                }
+
+            }
+
+            self.getPages();
+        }
+
+        //export
+        this.btnExportClicked = function (e) {
+            self.exportCSV(self.data, self.gridName, true);
+        }
+
+        //clear the search, return raw data
+        this.btnClearSearchClicked = function () {
+            self.data = self.rawData.slice();
+            self.txtSearch.value = '';
+            self.getPages();
+        }
+
+        //search condition is OR
+        //need enhacement on this part
+        this.btnSearchClicked = function () {
+
+            self.data = self.rawData.slice();
+            //search by text
+            var s = self.txtSearch.value.toLowerCase();
+            if (s.length > 0) {
+                self.data = new jinqJs()
+                        .from(self.data)
+                        .where(function (row) {
+                            //loop each item in cols
+                            var bl = false;
+                            for (var c in self.cols) {
+                                if (bl == false) {
+                                    var val = row[self.cols[c].id];
+                                    if (val) {
+                                        val = val.toString().toLowerCase();
+                                        bl = (val.indexOf(s) >= 0) ? true : false;
+                                    }
+                                }
+                            }
+
+                            return bl;
+                        }).select();
+            }
+
+            self.getPages();
+        }
+
+        //get pages number and its list
+        this.getPages = function () {
+            self.pages = [];
+            var pageCount = parseInt(self.data.length / self.listCount);
+            if (pageCount < (self.data.length / self.listCount)) pageCount++;
+            for (var i = 0; i < pageCount; i++) {
+                self.pages.push({ pageNo: i });
+            }
+
+            self.pageChanged();
+        }
+
+        //sort data by field name
+        this.sortData = function (e) {
+            if (self.data.length > 0) {
+                var n = e.srcElement.dataset.field;
+                if (self.sorted.field == n) {
+                    self.sorted.sort = self.sorted.sort == 'asc' ? 'desc' : 'asc';
+                }
+                else {
+                    self.sorted.field = n;
+                    self.sorted.sort = 'asc';
+                }
+
+                var sortlist = [];
+                sortlist.push(self.sorted);
+
+                //using jinqJS to sort data
+                self.data = new jinqJs()
+                           .from(self.data)
+                           .orderBy(sortlist)
+                           .select();
+            }
+            self.pageChanged();
+        }
+
+        //convert json to array
+        this.jsonToArray = function (res) {
+            if (res != null) {
+                self.data = res;
+                self.rawData = self.data.slice();
+                //show page
+                self.getPages();
+            }
+            else {
+                //no data?
+            }
+        }
+
+        //page changed by cbo
+        this.cboPagesChanged = function () {
+            self.selectedPage = self.cboPages.value;
+            self.pageChanged();
+        }
+
+        //page change event
+        this.pageChanged = function () {
+            self.gridData = [];
+            if (self.data.length > 0) {
+                self.gridData = self.data.slice((self.selectedPage * self.listCount),
+                                                (self.selectedPage * self.listCount) + self.listCount);
+                //add row number
+                for (var i = 0; i < self.gridData.length; i++) {
+                    self.gridData[i].rowNo =  (self.selectedPage * self.listCount) + i + 1;
+                }
+
+                console.log(JSON.stringify(self.gridData));
+            }
+
+            self.Item = null;
+            self.trigger('pageChanged', self.selectedPage + 1);
+            if (self.cols.length == 0)
+                self.update();
+
+        }
+
+        //prev rec
+        this.btnPreRecordClicked = function () {
+            self.selectedPage = self.selectedPage - 1;
+            if (self.selectedPage < 0) self.selectedPage = 0;
+            self.pageChanged();
+        }
+
+        //first rec
+        this.btnFirstRecordClicked = function () {
+            self.selectedPage = 0;
+            self.pageChanged();
+        }
+
+        //last rec
+        this.btnLastRecordClicked = function () {
+            self.selectedPage = self.pages.length - 1;
+            self.pageChanged();
+        }
+
+        //next rec
+        this.btnNextRecordClicked = function () {
+            self.selectedPage = self.selectedPage + 1;
+            if (self.selectedPage > self.pages.length) self.selectedPage = self.pages.length;
+            self.pageChanged();
+        }
+
+        //reformat td
+        this.rgFormat = function (txt, format, dec, sym) {
+            var val = txt;
+            if (format) {
+                switch (format) {
+                    case 'number':
+                        dec = dec ? dec : 0;
+                        sym = sym ? sym : '';
+                        val = sym + self.formatNumber(parseFloat(val), dec);
+                        break;
+                    case 'date':
+                        val = moment(val).format('DD/MMM/YYYY');
+                        break;
+                    case "bool":
+                        val = (val == true) ? 'YES' : 'NO';
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return val;
+        }
+
+    </script>
+
+    <style scoped>
+        a {
+            cursor: pointer;
+        }
+
+        .paging {
+            text-align: center;
+            align-content: center;
+            display: table-cell;
+            width: 33.33%;
+        }
+
+        .btnRight {
+            display: table-cell;
+            align-content: flex-end;
+            width: 33.33%;
+            text-align: right;
+        }
+
+        .btnLeft {
+            display: table-cell;
+            align-content: flex-start;
+            width: 33.33%;
+        }
+
+        .rg-left {
+            text-align: left;
+        }
+
+        .rg-right {
+            text-align: right;
+        }
+
+        .rg-center {
+            text-align: center;
+        }
+
+        .btn-link {
+            margin-left: 2px;
+            margin-right: 4px;
+        }
+
+        .btn-grid, .headerNo {
+            /*width: 50px !important;
+            max-width: 50px !important;*/
+        }
+
+        .riotGridHeader, .riotGridBody {
+            display: block;
+            width: 100%;
+            padding: 3px;
+            border: 1px solid #000;
+        }
+
+        .riotGridFooter, .riotGridHeader {
+            background-color: #fb9797;
+        }
+
+        .riotGridFooter {
+            display: flex;
+            width: 100%;
+            padding: 3px;
+            border: 1px solid #000;
+        }
+
+        .riotGridBodyDetail {
+            max-width: 100%;
+            overflow-y: auto;
+            height: 500px;
+            margin: 0px;
+        }
+
+        .riotGridBody {
+            max-width: 100%;
+            overflow: auto;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0.5em;
+            height: 0.5em;
+        }
+
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: maroon;
+            outline: 1px solid red;
+        }
+
+        .riotGridFixHeader {
+            max-width: 100%;
+            overflow: hidden;
+            margin: 0px;
+            padding-right: 5px;
+        }
+
+        /*using html5 stop fix thead header*/
+        .table tbody{
+            overflow-y: scroll
+        }
+
+        .table {
+            border-spacing: 0;
+            /*width: 100%;*/
+            table-layout: fixed;
+        }
+
+            .table td, th {
+                border: 1px solid #eee;
+                padding: 3px;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            .table th {
+                text-align: center;
+                font-weight: bold;
+                background-color: black;
+                color: yellow;
+                /*height: 100%;*/
+            }
+
+            .table tr:hover {
+                background-color: #00ffff !important;
+            }
+
+            .table th.resizing {
+                cursor: col-resize;
+            }
+
+            .table th input {
+                width: 100%;
+                max-width: 100%;
+                background-color: yellow;
+                border: 0.01em solid #808080;
+            }
+
+        .selectedRow {
+            background-color: yellow;
+        }
+
+        .rg-checkbox {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            display: block;
+            background-repeat: no-repeat;
+            margin: 0 auto;
+        }
+
+        /*.table thead tr{
+            display:block;
+            border: 1px solid black;
+        }
+
+        .table th,table td{
+            width: 100px;
+            border: 1px solid black;
+        }
+
+
+        .table  tbody{
+          display:block;
+          height:200px;
+          overflow:auto;
+        }*/
+
+            
+    </style>
+</rg>
+
+<rg-raw>
+    <script>
+        this.on('update', function () {
+            this.root.innerHTML = opts.content;
+        })
+    </script>
+</rg-raw>
+<rg-checkbox>
+    <script>
+        this.on('update', function myfunction() {
+            this.root.innerHTML = '<input data-field="' + opts.dataField + '" class="rg-checkbox" type="' + opts.type + '" ' + (opts.content ? 'checked' : '') + '>';
+        })
+    </script>
+</rg-checkbox>

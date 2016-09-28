@@ -1,0 +1,249 @@
+﻿<!--this is for the data detail-->
+<!--some settings-->
+<!--
+    
+libs to be included
+    <script src="js/riot.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/jinq.min.js"></script>
+    <script src="js/mixins.js"></script>
+    you can get them directly from links, however, sometime I work offline, so I saved them in my project
+    
+usage: 'recommend grid and <rg-cells> are placed in a tag, otherwise, it won't look right in your html file (of cos it still works)
+    this.on('mount', function () {
+        var gridTag = self.tags.rg;
+        gridTag.loadData(data, options)
+        
+        //THIS IS HOW TO GET THE EVENT RAISED (trigger)
+        gridTag.on('*', function (cmd, item) {
+            console.log(cmd);
+            console.log(item);
+        })
+
+        gridTag.on('triggerName', function(item){
+            console.log(item)
+        })
+    })
+
+    
+<rg-cells>: is very important, it contains <td>
+
+    e.rowNo:    row number 1,2,3,4...
+
+    <td>:
+        *data-field: THIS IS IMPORTANT BECAUSE IT HELPS TO RESIZE AND FILTER AND SORT*
+        
+        function
+            rg-format:
+                date:   DD/MMM/YYYY ==> momentjs
+                bool:   true/false ==> YES/NO
+                html:   leave format=null, and add rg-raw with content={e.columnName}. Ex: <rg-raw content="{e.html}" />
+                number: #,###
+                    dec:    2 ==> #,###.##
+                    sym:    $ ==> $ #,###.##
+
+                checkbox: []
+                radio: o
+                    must use rg-checkbox due to riot conflict of row click, cell click
+                    <rg-checkbox data-field="rad" type="radio" content="{e.rad}">
+                    <rg-checkbox data-field="chk" type="checkbox" content="{e.chk}">
+
+       format    
+            cell format:
+                class
+                style
+        
+        Ex:
+            <td data-field="" class="rg-center" title="No" >{e.rowNo}</td>
+            <td data-field="rad" title="radio"><rg-checkbox data-field="rad" type="radio" content="{e.rad}"></td>
+            <td data-field="chk" title="checkbox"><rg-checkbox data-field="chk" type="checkbox" content="{e.chk}"></td>
+            <td data-field="emp_id" title="Emp No" class="rg-center">{e.emp_id}</td>
+            <td data-field="full_name" title="Full Name" rg-width="250px">{e.full_name}</td>
+            <td data-field="hired_date" title="Hired Date" class="rg-center">{rgFormat(e.hired_date, 'date')}</td>
+            <td data-field="age" title="Age" class="rg-center">{rgFormat(e.age, 'number')}</td>
+           
+
+Grid
+    events:
+        *               return all the trigger will return
+        add:            return null
+        rowClicked:     return item      
+        rowDbClicked:   return item      
+        cellClicked:    return {item, cell}
+        cellDbClicked:  return {item, cell}
+        *button click*: return triggerName //buttons are setup by options
+        pageChanged:    return page number
+
+    buttons:
+        btnName:        'string' -> must
+        triggerName:    'string' -> must
+        buttonPosition: 'left' or 'right'
+        css:            'class'
+        Ex:
+        var buttons = [
+                { btnName: 'View', triggerName: 'select', css: 'btn-default' },
+                { btnName: 'Delete', triggerName: 'del', buttonPosition: 'right' },
+                { btnName: 'Edit', triggerName: 'edit' }
+            ];
+
+    options
+
+        Ex:
+        var options = {
+                    key: 'emp_id',          -> important
+                    gridName: 'Employee',   -> important
+                    allowAddNew: true,      -> show add new button
+                    allowExport: true,      -> show export button
+                    allowSearch: true,      -> show search button
+                    allowFilters: true,     -> show filters
+                    listCount: 20,          -> number of rows
+                    selectedPage: 0,        -> default page
+                    gridHeight: '500px',    -> height px, em or %...
+                    gridWidth: '100%',      -> width px, em or %...
+                    buttons: buttons,       -> buttons (guide is above this)
+                    allowResizeCol: true    -> allow to resize the headers , def is false
+                }
+    data:
+         row format:
+                css
+        json:
+            //note: rowNo is auto if you set {e.rowNo}
+            data = [  
+               {  
+                  "rad":false,
+                  "chk":true,
+                  "emp_id":"127015",
+                  "full_name":"CARROT PROPITIOUS",
+                  "age":38.0156581803093,
+                  "hired_date":"2013-10-16T07:40:30.848Z",
+                  "report_time":"2:48",
+                  "salary":81423.36729921694,
+                  "active":true,
+                  "html":"<strong style=\"color:#458772\">riot grid html</strong>",
+                  "css":"altRow",
+                  "rowNo":1
+               },
+               {  
+                  "rad":false,
+                  "chk":true,
+                  "emp_id":"145982",
+                  "full_name":"CUPCAKE QUERULOUS",
+                  "age":22.93797629285258,
+                  "hired_date":"2016-09-26T11:40:35.511Z",
+                  "report_time":"19:53",
+                  "salary":40998.398017574116,
+                  "active":false,
+                  "html":"<strong style=\"color:#785165\">riot grid html</strong>",
+                  "css":false,
+                  "rowNo":2
+               },
+               {  
+                  "rad":false,
+                  "chk":true,
+                  "emp_id":"95594",
+                  "full_name":"KAZOO GUSTATORY",
+                  "age":59.5639967422636,
+                  "hired_date":"2013-02-02T07:16:57.476Z",
+                  "report_time":"19:17",
+                  "salary":16779.365926661998,
+                  "active":true,
+                  "html":"<strong style=\"color:#492048\">riot grid html</strong>",
+                  "css":"altRow",
+                  "rowNo":3
+               }
+            ]
+
+Oops! forgot to tell you that I have a mixins in js/mixins that contains some function that I made for easier life.
+    I used one of them for the grid, it's 'exportCSV' 
+
+-->
+
+<rg-cells>
+    <!--riot has error of radio and checkbox, so I use class-->
+    <td data-field="" class="rg-center" title="No" >{e.rowNo}</td>
+    <td data-field="rad" title="radio"><rg-checkbox data-field="rad" type="radio" content="{e.rad}"></td>
+    <td data-field="chk" title="checkbox"><rg-checkbox data-field="chk" type="checkbox" content="{e.chk}"></td>
+    <td data-field="emp_id" title="Emp No" class="rg-center">{e.emp_id}</td>
+    <td data-field="full_name" title="Full Name" rg-width="250px">{e.full_name}</td>
+    <td data-field="hired_date" title="Hired Date" class="rg-center">{rgFormat(e.hired_date, 'date')}</td>
+    <td data-field="age" title="Age" class="rg-center">{rgFormat(e.age, 'number')}</td>
+    <td data-field="report_time" title="Report hrs" class="rg-center">{e.report_time}</td>
+    <td data-field="salary" title="Salary" class="rg-right" sym="$">{rgFormat(e.salary, 'number', 2, '$')}</td>
+    <td data-field="active" title="Active" class="rg-center">{rgFormat(e.active, 'bool')}</td>
+    <td data-field="html" title="Remarks"><rg-raw content="{e.html}" /></td>
+</rg-cells>
+
+<!--demo only-->
+<demo>
+    <h1>riot grid</h1>
+    <rg></rg>
+
+    <script>
+
+        var data = [];
+        var self = this;
+
+        var adjectives = ["adamant", "adroit", "amatory", "animistic", "antic", "arcadian", "baleful", "bellicose", "bilious", "boorish", "calamitous", "caustic", "cerulean", "comely", "concomitant", "contumacious", "corpulent", "crapulous", "defamatory", "didactic", "dilatory", "dowdy", "efficacious", "effulgent", "egregious", "endemic", "equanimous", "execrable", "fastidious", "feckless", "fecund", "friable", "fulsome", "garrulous", "guileless", "gustatory", "heuristic", "histrionic", "hubristic", "incendiary", "insidious", "insolent", "intransigent", "inveterate", "invidious", "irksome", "jejune", "jocular", "judicious", "lachrymose", "limpid", "loquacious", "luminous", "mannered", "mendacious", "meretricious", "minatory", "mordant", "munificent", "nefarious", "noxious", "obtuse", "parsimonious", "pendulous", "pernicious", "pervasive", "petulant", "platitudinous", "precipitate", "propitious", "puckish", "querulous", "quiescent", "rebarbative", "recalcitant", "redolent", "rhadamanthine", "risible", "ruminative", "sagacious", "salubrious", "sartorial", "sclerotic", "serpentine", "spasmodic", "strident", "taciturn", "tenacious", "tremulous", "trenchant", "turbulent", "turgid", "ubiquitous", "uxorious", "verdant", "voluble", "voracious", "wheedling", "withering", "zealous"];
+        var nouns = ["ninja", "chair", "pancake", "statue", "unicorn", "rainbows", "laser", "senor", "bunny", "captain", "nibblets", "cupcake", "carrot", "gnomes", "glitter", "potato", "salad", "toejam", "curtains", "beets", "toilet", "exorcism", "stick figures", "mermaid eggs", "sea barnacles", "dragons", "jellybeans", "snakes", "dolls", "bushes", "cookies", "apples", "ice cream", "ukulele", "kazoo", "banjo", "opera singer", "circus", "trampoline", "carousel", "carnival", "locomotive", "hot air balloon", "praying mantis", "animator", "artisan", "artist", "colorist", "inker", "coppersmith", "director", "designer", "flatter", "stylist", "leadman", "limner", "make-up artist", "model", "musician", "penciller", "producer", "scenographer", "set decorator", "silversmith", "teacher", "auto mechanic", "beader", "bobbin boy", "clerk of the chapel", "filling station attendant", "foreman", "maintenance engineering", "mechanic", "miller", "moldmaker", "panel beater", "patternmaker", "plant operator", "plumber", "sawfiler", "shop foreman", "soaper", "stationary engineer", "wheelwright", "woodworkers"];
+        //create some fake data
+        var start = new Date(2012, 0, 1);
+        var end = new Date();
+
+        for (var i = 0; i < 10000; i++) {
+            obj = {
+                rad: false,
+                chk: true,
+                emp_id: parseInt(Math.random() * (899999 - 800000) + 80000).toString(),
+                full_name: nouns[parseInt(Math.random() * (nouns.length - 1) + 1)].toUpperCase() + ' ' + adjectives[parseInt(Math.random() * (adjectives.length - 1) + 1)].toUpperCase(),
+                age: Math.random() * (65 - 18) + 18,
+                hired_date: new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())),
+                report_time: parseInt(Math.random() * (24 - 0) + 0).toString() + ':' + parseInt(Math.random() * (60 - 0) + 0).toString(),
+                salary: Math.random() * (100000 - 10000) + 10000,
+                active: parseInt(Math.random() * 2) == 1 ? true : false,
+                html: '<strong style="color:#' + parseInt(Math.random() * (999999)) + '">riot grid html</strong>',
+                css: i % 2 == 0 ? 'altRow' : false
+            }
+            data.push(obj);
+        }
+
+        var buttons = [
+            { btnName: 'View', triggerName: 'select',  css: 'btn-default' },
+            { btnName: 'Delete', triggerName: 'del',  buttonPosition: 'right' },
+            { btnName: 'Edit', triggerName: 'edit' }
+        ];
+
+        var options = {
+            key: 'emp_id',
+            gridName: 'Employee',
+            allowAddNew: true,
+            allowExport: true,
+            allowSearch: true,
+            allowFilters: true,
+            listCount: 20,
+            selectedPage: 0,
+            gridHeight: '500px',
+            gridWidth: '100%',
+            buttons: buttons,
+            allowResizeCol: true //def is false
+        }
+
+        this.on('mount', function () {
+            var gridTag = self.tags.rg;
+            gridTag.loadData(data, options)
+
+            gridTag.on('*', function (cmd, item) {
+                console.log(cmd);
+                console.log(item);
+            })
+        })
+    </script>
+
+    <style>
+        .btn-default{
+            color: red;
+            background-color: greenyellow;
+        }
+    </style>
+
+</demo>
+
