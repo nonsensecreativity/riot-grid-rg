@@ -532,9 +532,12 @@
                         dec = dec ? dec : self.dateFormat; //using moment js date format
                         val = moment(val).format(dec);
                         break;
-                    case "bool":
+                    case 'bool':
                         val = (val == true) ? 'YES' : 'NO';
                         break;
+                    case 'image':
+                        dec = dec ? dec : '';
+                        val = '<img src="' + dec + val + '" />';
                     default:
                         break;
                 }
@@ -698,6 +701,7 @@
         })
     </script>
 </rg-raw>
+
 <rg-checkbox>
     <script>
         this.on('update', function myfunction() {
@@ -705,3 +709,11 @@
         })
     </script>
 </rg-checkbox>
+
+<rg-image>
+    <script>
+        this.on('update', function myfunction() {
+            this.root.innerHTML = '<img src="' + opts.content + '" onerror="this.src\=\'' + 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' + '\'; " />';
+        })
+    </script>
+</rg-image>
