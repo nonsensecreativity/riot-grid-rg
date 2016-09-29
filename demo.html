@@ -1,7 +1,11 @@
 <!--this is for the data detail-->
 <!--some settings-->
 <!--
-    
+Version 1.0: 
+    Date: 28/Sep/2016
+    Coded by: Miller Nguyen (miller_nguyen@hotmail.com)
+    Git: https://github.com/rongxike/riot-grid-rg
+
 libs to be included
     <script src="js/riot.js"></script>
     <script src="js/moment.min.js"></script>
@@ -90,19 +94,45 @@ Grid
 
         Ex:
         var options = {
-                    key: 'emp_id',          -> important
-                    gridName: 'Employee',   -> important
-                    allowAddNew: true,      -> show add new button
-                    allowExport: true,      -> show export button
-                    allowSearch: true,      -> show search button
-                    allowFilters: true,     -> show filters
-                    listCount: 20,          -> number of rows
-                    selectedPage: 0,        -> default page
-                    gridHeight: '500px',    -> height px, em or %...
-                    gridWidth: '100%',      -> width px, em or %...
-                    buttons: buttons,       -> buttons (guide is above this)
-                    allowResizeCol: true    -> allow to resize the headers , def is false
+                    key: 'emp_id',          // important
+                    gridName: 'Employee',   // important
+                    allowAddNew: true,      // show add new button
+                    allowExport: true,      // show export button
+                    allowSearch: true,      // show search button
+                    allowFilters: true,     // show filters
+                    listCount: 20,          // number of rows
+                    selectedPage: 0,        // default page
+                    gridHeight: '500px',    // height px, em or %...
+                    gridWidth: '100%',      // width px, em or %...
+                    buttons: buttons,       // buttons (guide is above this)
+                    allowResizeCol: true    // allow to resize the headers , def is false
+                //29-Sept-2016
+                    //added new options
+                    addNewBtnText : 'Add New',
+                    showFilterBtnText : 'Show Filters',
+                    searchBtnText : 'Search',
+                    clearSearchBtnText : 'Clear Search',
+                    exportBtnText : 'Export to CSV',
+                    nextBtnText : '>',
+                    prevBtnText : '<',
+                    firstBtnText : '<<',
+                    lastBtnText : '>>',
+                    totalLblText : 'Total:',
+                    recLblText : 'records',
+                    hideFilterBtnText : 'Hide Filters',
+                    dateFormat : 'DD/MMM/YYYY',
+                    altRowColor : '#e8ecf2',
+                    rowColor : 'transparent',
+                    hoverRowColor : '#c5f7f9',
+                    selectedRowColor : '#ff93cb',
+                    headerCss: 'headerCss',
+                    bottomPanelCss : 'bottomPanelCss',
+                    topPanelCss: 'topPanelCss'
                 }
+
+        
+           
+
     data:
          row format:
                 css
@@ -224,16 +254,37 @@ Oops! forgot to tell you that I have a mixins in js/mixins that contains some fu
             gridHeight: '500px',
             gridWidth: '100%',
             buttons: buttons,
-            allowResizeCol: true //def is false
+            allowResizeCol: false, //def is false
+            addNewBtnText : 'Add New',
+            showFilterBtnText : 'Show Filters',
+            searchBtnText : 'Search',
+            clearSearchBtnText : 'Clear Search',
+            exportBtnText : 'Export to CSV',
+            nextBtnText : '>',
+            prevBtnText : '<',
+            firstBtnText : '<<',
+            lastBtnText : '>>',
+            totalLblText : 'Total:',
+            recLblText : 'records',
+            hideFilterBtnText : 'Hide Filters',
+            dateFormat: 'DD-MMM-YYYY',
+            altRowColor: '#e8ecf2',
+            rowColor: 'transparent',
+            hoverRowColor: '#c5f7f9',
+            selectedRowColor: '#54eef9',
+            headerCss: 'headerCss',
+            headerStyle: 'color: yellow !important',
+            bottomPanelCss : 'bottomPanelCss',
+            topPanelCss: 'topPanelCss'
         }
 
         this.on('mount', function () {
             var gridTag = self.tags.rg;
             gridTag.loadData(data, options)
 
-            gridTag.on('*', function (cmd, item) {
-                console.log(cmd);
-                console.log(item);
+            gridTag.on('*', function (triggerName, item) {
+                //console.log(triggerName);
+                //console.log(item);
             })
         })
     </script>
@@ -243,7 +294,30 @@ Oops! forgot to tell you that I have a mixins in js/mixins that contains some fu
             color: red;
             background-color: greenyellow;
         }
+
+        body {
+            font-family: 'Arial Narrow', 'Arial', 'sans-serif';
+            padding: 10px;
+        }
+
+        .altRow {
+            /*background-color: lightblue !important;*/
+        }
+
+        .headerCss{
+            background-color: green !important;
+        }
+
+        .bottomPanelCss{
+            background-color: #bed9db !important;
+        }
+
+        .topPanelCss{
+            background-color: #eafbfc !important;
+        }
+
     </style>
+
 
 </demo>
 
