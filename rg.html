@@ -1,44 +1,47 @@
 <rg>
     <div class="riotGrid">
         <!--panel-->
-        <div class="riotGridHeader">
+        <div class="riotGridHeader  {topPanelCss}">
             <span if="{allowSearch==true}">
                 <input type="text" id="txtSearch" placeholder="enter text to search" />
-                <button type="button" onclick="{ btnSearchClicked }"><i class="glyphicon glyphicon-search" />&nbsp;Search</button>
-                <button type="button" onclick="{ btnClearSearchClicked }"><i class="glyphicon glyphicon-remove" />&nbsp;Clear</button>
+                <button type="button" onclick="{ btnSearchClicked }"><i class="glyphicon glyphicon-search" />&nbsp;{searchBtnText}</button>
+                <button type="button" onclick="{ btnClearSearchClicked }"><i class="glyphicon glyphicon-remove" />&nbsp;{clearSearchBtnText}</button>
             </span>
-            <button type="button" if="{allowAddNew==true}" onclick="{ btnAddNewClicked }"><i class="glyphicon glyphicon-plus" />Add New</button>
-            <button type="button" if="{allowExport==true}" onclick="{ btnExportClicked }"><i class="glyphicon glyphicon-export" />&nbsp;Export to CSV</button>
+            <button type="button" if="{allowAddNew==true}" onclick="{ btnAddNewClicked }">{addNewBtnText}</button>
+            <button type="button" if="{allowExport==true}" onclick="{ btnExportClicked }">{exportBtnText}</button>
             <button type="button" onclick="{ btnShowFilters }" if="{allowFilters==true}"
                     class="btn {btn-info: !showFilters, btn-danger: showFilters} btn-sm">
-                <i class="glyphicon glyphicon-filter" />&nbsp;{showFilters==true? 'Hide Filters': 'Show Filters'}
+                <i class="glyphicon glyphicon-filter" />&nbsp;{showFilters==true? hideFilterBtnText: showFilterBtnText}
             </button>
 
-            <span style="float: right">Total: &nbsp;{formatNumber(data.length)} records</span>
+            <span style="float: right">{totalLblText}&nbsp;{formatNumber(data.length)} {recLblText}</span>
 
         </div>
 
         <div class="riotGridBody">
             <div>
-                <!--<div class="riotGridFixHeader">
-
-                </div>-->
-                <!--body-->
                 <div class="riotGridBodyDetail">
-                    <table class="table tableBody">
+                    <table class="rg-table tableBody">
                         <thead>
                             <!--cols header-->
                             <tr>
-                                <th each="{cols}" style="width:{width? width:'50px'}"  data-field="{id}"><a data-field="{id}" onclick="{ sortData }">{title}</a></th>
+                                <th each="{cols}" style="width:{width? width:'50px'};" class="{this.headerCss}"  data-field="{id}"><a data-field="{id}" onclick="{ sortData }">{title}</a></th>
                             </tr>
 
                             <!--filter-->
                             <tr show="{showFilters}">
-                                <th each="{cols}" style="width:{width? width:'50px'}"  data-field="{id}"><input type="text" class="input-filter" onkeyup="{filterData}" data-field="{id}" /></th>
+                                <th each="{cols}" style="width:{width? width:'50px'};" class="{this.headerCss}"   data-field="{id}"><input type="text" class="input-filter" onkeyup="{filterData}" data-field="{id}" /></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css} {selectedRow: Item[key] == e[key]}" ondblclick="{ rowDbClick }" onclick="{ rowClicked }"></tr>
+                            <tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css} {rg-selectedRow: Item[key] == e[key], rg-altRow: (index % 2 == 1)}" 
+                                ondblclick="{ rowDbClick }" onclick="{ rowClicked }"></tr>
+
+                            <!--<tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css}"
+                                onMouseOver="this.style.backgroundColor = '{hoverRowColor}'"
+                                onMouseOut="this.style.backgroundColor = '{(Item && Item[key] == e[key]) ? selectedRowColor : ((index%2==0) ? altRowColor : rowColor)}'"
+                                style="background-color:{(Item && Item[key] == e[key]) ? selectedRowColor : ((index % 2 == 0) ? altRowColor : rowColor)};" ondblclick="{ rowDbClick }" onclick="{ rowClicked }"></tr>-->
+
                         </tbody>
                     </table>
                 </div>
@@ -46,33 +49,33 @@
         </div>
 
         <!--footer-->
-        <div class="riotGridFooter">
-            <div class="btnLeft">
+        <div class="riotGridFooter  {bottomPanelCss}">
+            <div class="btnLeft {topPanelBkgColor}">
                 <div class="btnGroup" show="{Item}">
-                    <input each="{buttonLefts}" type="button" class="btn-link {css}" data-field="{value}" onclick="{ btnClicked }" value="{btnName}" name="{name}" />
+                    <button each="{buttonLefts}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}" >{btnName}</button>
                 </div>
             </div>
             <div class="paging">
                 <button type="button" onclick="{ btnFirstRecordClicked }" disabled="{!(selectedPage>0)}">
-                    <strong><<</strong>
+                    <strong>{firstBtnText}</strong>
                 </button>
                 <button type="button" onclick="{ btnPreRecordClicked }" disabled="{!(selectedPage>0)}">
-                    <strong><</strong>
+                    <strong>{prevBtnText}</strong>
                 </button>
                 <select id="cboPages" onchange="{ cboPagesChanged }">
                     <option value="{pageNo}" each="{pages}" selected="{selectedPage==pageNo}">{pageNo+1}</option>
                 </select>
                 <span>/{pages.length}</span>
                 <button type="button" onclick="{ btnNextRecordClicked }" disabled="{!(selectedPage<pages.length-1)}">
-                    <strong>></strong>
+                    <strong>{nextBtnText}</strong>
                 </button>
                 <button type="button" onclick="{ btnLastRecordClicked }" disabled="{!(selectedPage<pages.length-1)}">
-                    <strong>>></strong>
+                    <strong>{lastBtnText}</strong>
                 </button>
             </div>
             <div class="btnRight">
                 <div class="btnGroup" show="{Item}">
-                    <input each="{buttonRights}" type="button" class="btn-link {css}" data-field="{value}" onclick="{ btnClicked }" value="{btnName}" name="{name}" />
+                    <button each="{buttonRights}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }"  name="{name}" >{btnName}</button>
                 </div>
             </div>
         </div>
@@ -106,6 +109,28 @@
         this.moving = false;
         this.key = 'ID';
         this.allowResizeCol = false;
+        //some title setups
+        this.addNewBtnText = 'Add New';
+        this.showFilterBtnText = 'Show Filters';
+        this.searchBtnText = 'Search';
+        this.clearSearchBtnText = 'Clear Search';
+        this.exportBtnText = 'Export to CSV';
+        this.nextBtnText = '>';
+        this.prevBtnText = '<';
+        this.firstBtnText = '<<';
+        this.lastBtnText = '>>';
+        this.totalLblText = 'Total:';
+        this.recLblText = 'records';
+        this.hideFilterBtnText = 'Hide Filters';
+        this.dateFormat = 'DD/MMM/YYYY';
+        this.altRowColor = '#e8ecf2';
+        this.rowColor = 'transparent';
+        this.hoverRowColor = '#c5f7f9';
+        this.selectedRowColor = '#54eef9';
+        this.headerCss = null;
+        this.bottomPanelCss = null;
+        this.topPanelCss = null;
+
         var self = this;
         var startX, startWidth, col;
 
@@ -202,6 +227,7 @@
         this.reformatGrid = function () {
             var riotGridBodyDetail = this.root.getElementsByClassName("riotGridBodyDetail")[0];
             riotGridBodyDetail.style.height = self.gridHeight.toString();
+            
 
             var tableBody = this.root.getElementsByClassName("tableBody")[0];
             if (tableBody) {
@@ -247,6 +273,15 @@
                             arr.push(obj);
                         }
                         self.cols = arr.slice();
+
+                        console.log(new Date());
+
+                        var style = document.createElement('style');
+                        style.type = 'text/css';
+                        style.innerHTML = '.rg-selectedRow { background-color: ' + self.selectedRowColor + ' !important; }'
+                                            + '\n .rg-table tr:hover { background-color: ' + self.hoverRowColor + '; }'
+                                            + '\n .rg-altRow { background-color: ' + self.altRowColor + '; }';
+                        document.getElementsByTagName('head')[0].appendChild(style);
                     }
                 }
             }
@@ -494,7 +529,8 @@
                         val = sym + self.formatNumber(parseFloat(val), dec);
                         break;
                     case 'date':
-                        val = moment(val).format('DD/MMM/YYYY');
+                        dec = dec ? dec : self.dateFormat; //using moment js date format
+                        val = moment(val).format(dec);
                         break;
                     case "bool":
                         val = (val == true) ? 'YES' : 'NO';
@@ -546,27 +582,32 @@
             text-align: center;
         }
 
-        .btn-link {
-            margin-left: 2px;
-            margin-right: 4px;
-        }
-
         .riotGridHeader, .riotGridBody {
             display: block;
             width: 100%;
             padding: 3px;
-            border: 1px solid #000;
+            border: 1px solid #808080;
         }
 
-        .riotGridFooter, .riotGridHeader {
-            background-color: #fb9797;
+        .riotGridBody {
+            max-width: 100%;
+            overflow: auto;
+        }
+
+        .riotGridFooter {
+            background-color: #bed9db;
+        }
+
+        .riotGridHeader {
+            background-color: #eafbfc;
         }
 
         .riotGridFooter {
             display: flex;
             width: 100%;
             padding: 3px;
-            border: 1px solid #000;
+            border: 1px solid #808080;
+            background-color: #bed9db;
         }
 
         .riotGridBodyDetail {
@@ -576,10 +617,7 @@
             margin: 0px;
         }
 
-        .riotGridBody {
-            max-width: 100%;
-            overflow: auto;
-        }
+        
 
         ::-webkit-scrollbar {
             width: 0.5em;
@@ -602,38 +640,34 @@
             padding-right: 5px;
         }
 
-        .table tbody{
+        .rg-table tbody{
             overflow-y: scroll
         }
 
-        .table {
+        .rg-table {
             border-spacing: 0;
             table-layout: fixed;
         }
 
-            .table td, th {
+            .rg-table td, th {
                 border: 1px solid #eee;
                 padding: 3px;
                 overflow: hidden;
                 white-space: nowrap;
             }
 
-            .table th {
+            .rg-table th {
                 text-align: center;
-                font-weight: bold;
                 background-color: black;
                 color: yellow;
+
             }
 
-            .table tr:hover {
-                background-color: #00ffff !important;
-            }
-
-            .table th.resizing {
+            .rg-table th.resizing {
                 cursor: col-resize;
             }
 
-            .table th input {
+            .rg-table th input {
                 width: 100%;
                 max-width: 100%;
                 background-color: yellow;
@@ -641,7 +675,7 @@
             }
 
         .selectedRow {
-            background-color: yellow;
+            background-color: yellow !important;
         }
 
         .rg-checkbox {
