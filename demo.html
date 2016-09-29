@@ -6,6 +6,11 @@ Version 1.0:
     Coded by: Miller Nguyen (miller_nguyen@hotmail.com)
     Git: https://github.com/rongxike/riot-grid-rg
 
+    Date: 29-Sept-2016
+        added new options for fully style/css 
+        add new <rg-image> for image field
+            Usage: <td data-field="emp_id" title="Photo" class="rg-center"><rg-image data-field="emp_id" content="photos/{e.emp_id}.png"></td>
+
 libs to be included
     <script src="js/riot.js"></script>
     <script src="js/moment.min.js"></script>
@@ -193,6 +198,7 @@ Oops! forgot to tell you that I have a mixins in js/mixins that contains some fu
     <td data-field="" class="rg-center" title="No" >{e.rowNo}</td>
     <td data-field="rad" title="radio"><rg-checkbox data-field="rad" type="radio" content="{e.rad}"></td>
     <td data-field="chk" title="checkbox"><rg-checkbox data-field="chk" type="checkbox" content="{e.chk}"></td>
+    <td data-field="emp_id" title="Photo" class="rg-center"><rg-image data-field="emp_id" content="photos/{e.emp_id}.png"></td>
     <td data-field="emp_id" title="Emp No" class="rg-center">{e.emp_id}</td>
     <td data-field="full_name" title="Full Name" rg-width="250px">{e.full_name}</td>
     <td data-field="hired_date" title="Hired Date" class="rg-center">{rgFormat(e.hired_date, 'date')}</td>
