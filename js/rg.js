@@ -414,9 +414,12 @@ riot.tag2('rg', '<div class="riotGrid"> <div class="riotGridHeader {topPanelCss}
                         dec = dec ? dec : self.dateFormat;
                         val = moment(val).format(dec);
                         break;
-                    case "bool":
+                    case 'bool':
                         val = (val == true) ? 'YES' : 'NO';
                         break;
+                    case 'image':
+                        dec = dec ? dec : '';
+                        val = '<img src="' + dec + val + '" />';
                     default:
                         break;
                 }
@@ -432,8 +435,15 @@ riot.tag2('rg-raw', '', '', '', function(opts) {
             this.root.innerHTML = opts.content;
         })
 });
+
 riot.tag2('rg-checkbox', '', '', '', function(opts) {
         this.on('update', function myfunction() {
             this.root.innerHTML = '<input data-field="' + opts.dataField + '" class="rg-checkbox" type="' + opts.type + '" ' + (opts.content ? 'checked' : '') + '>';
+        })
+});
+
+riot.tag2('rg-image', '', '', '', function(opts) {
+        this.on('update', function myfunction() {
+            this.root.innerHTML = '<img src="' + opts.content + '" onerror="this.src\=\'' + 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' + '\'; " />';
         })
 });
