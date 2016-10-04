@@ -9,8 +9,7 @@
             </span>
             <button type="button" if="{allowAddNew==true}" onclick="{ btnAddNewClicked }">{addNewBtnText}</button>
             <button type="button" if="{allowExport==true}" onclick="{ btnExportClicked }">{exportBtnText}</button>
-            <button type="button" onclick="{ btnShowFilters }" if="{allowFilters==true}"
-                    class="btn {btn-info: !showFilters, btn-danger: showFilters} btn-sm">
+            <button type="button" onclick="{ btnShowFilters }" if="{allowFilters==true}">
                 <i class="glyphicon glyphicon-filter" />&nbsp;{showFilters==true? hideFilterBtnText: showFilterBtnText}
             </button>
 
@@ -25,16 +24,16 @@
                         <thead>
                             <!--cols header-->
                             <tr>
-                                <th each="{cols}" style="width:{width? width:'50px'};" class="{this.headerCss}"  data-field="{id}"><a data-field="{id}" onclick="{ sortData }">{title}</a></th>
+                                <th each="{cols}" style="width:{width? width:'50px'};" class="{this.headerCss}" data-field="{id}"><a data-field="{id}" onclick="{ sortData }">{title}</a></th>
                             </tr>
 
                             <!--filter-->
                             <tr show="{showFilters}">
-                                <th each="{cols}" style="width:{width? width:'50px'};" class="{this.headerCss}"   data-field="{id}"><input type="text" class="input-filter" onkeyup="{filterData}" data-field="{id}" /></th>
+                                <th each="{cols}" style="width:{width? width:'50px'};" class="{this.headerCss}" data-field="{id}"><input type="text" class="input-filter" onkeyup="{filterData}" data-field="{id}" /></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css} {rg-selectedRow: Item[key] == e[key], rg-altRow: (index % 2 == 1)}" 
+                            <tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css} {rg-selectedRow: Item[key] == e[key], rg-altRow: (index % 2 == 1)}"
                                 ondblclick="{ rowDbClick }" onclick="{ rowClicked }"></tr>
 
                             <!--<tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css}"
@@ -52,7 +51,7 @@
         <div class="riotGridFooter  {bottomPanelCss}">
             <div class="btnLeft {topPanelBkgColor}">
                 <div class="btnGroup" show="{Item}">
-                    <button each="{buttonLefts}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}" >{btnName}</button>
+                    <button each="{buttonLefts}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}">{btnName}</button>
                 </div>
             </div>
             <div class="paging">
@@ -75,7 +74,7 @@
             </div>
             <div class="btnRight">
                 <div class="btnGroup" show="{Item}">
-                    <button each="{buttonRights}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }"  name="{name}" >{btnName}</button>
+                    <button each="{buttonRights}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}">{btnName}</button>
                 </div>
             </div>
         </div>
@@ -93,18 +92,21 @@
         this.rowNoWidth = 30;
         this.buttonLefts = [];
         this.buttonRights = [];
-
         //options
         this.listCount = 20; //number of records to be displayed
         this.selectedPage = 0;
         this.gridHeight = '500px';
-        this.gridName = 'RiotGrid';
+        this.gridName = 'Data';
         this.gridWidth = '100%';
         this.allowAddNew = true;
         this.allowExport = true;
         this.allowSearch = true;
         this.allowFilters = true;
-        this.buttons = [];
+        this.buttons = [
+                   { btnName: 'View', triggerName: 'select' },
+                   { btnName: 'Delete', triggerName: 'del', buttonPosition: 'right' },
+                   { btnName: 'Edit', triggerName: 'edit' }
+        ]; //some def buttons
         this.press = false;
         this.moving = false;
         this.key = 'ID';
@@ -130,43 +132,32 @@
         this.headerCss = null;
         this.bottomPanelCss = null;
         this.topPanelCss = null;
-
         var self = this;
         var startX, startWidth, col;
-
         var self = this;
-
         this.loadData = function (data, options) {
             //self.cols = headers;
-
             //update properties
             var obj = Object.assign({}, options); //.clone();
             for (var d in obj) {
                 self[d] = obj[d];
             }
-
             //reformat the buttons
             self.buttonLefts = [];
             self.buttonRights = [];
-
             if (self.buttons && self.buttons.length > 0) {
                 self.buttonLefts = new jinqJs()
                                 .from(self.buttons)
                                 .where(function (row) { return row.buttonPosition == null || row.buttonPosition == 'left' })
                                 .select();
-
-
                 self.buttonRights = new jinqJs()
                                 .from(self.buttons)
                                 .where(function (row) { return row.buttonPosition == 'right' })
                                 .select();
             }
-
             self.jsonToArray(data);
             self.update();
-
         }
-
         //mouse move and mouse up
         this.mouseEventInit = function () {
             if (self.allowResizeCol) {
@@ -176,7 +167,6 @@
                         col.className = col.className.replace(/resizing/g, '')
                         self.press = false;
                         self.moving = false;
-
                         //update the cols
                         for (var i in self.cols) {
                             if (self.cols[i].id == col.getAttribute('data-field')) {
@@ -184,7 +174,6 @@
                                 break;
                             }
                         }
-
                         col = null;
                     }
                 }, false);
@@ -199,13 +188,11 @@
                                 self.moving = true;
                                 return
                             }
-
                         }
                     }
                 }, false);
             }
         }
-
         //col mousedown
         this.mousedown = function (e) {
             if (self.allowResizeCol) {
@@ -218,23 +205,19 @@
                 self.mouseEventInit();
             }
         }
-
         this.btnAddNewClicked = function () {
             self.trigger('add', null);
         }
-
         //reformat the grid
         this.reformatGrid = function () {
             var riotGridBodyDetail = this.root.getElementsByClassName("riotGridBodyDetail")[0];
             riotGridBodyDetail.style.height = self.gridHeight.toString();
-            
 
             var tableBody = this.root.getElementsByClassName("tableBody")[0];
             if (tableBody) {
                 //change the width
                 if (self.gridWidth)
                     tableBody.style.width = self.gridWidth;
-
                 //assing event to th to allow resize it
                 if (self.allowResizeCol) {
                     var row = tableBody.getElementsByTagName('tr')[0];
@@ -247,11 +230,9 @@
                         }
                     }
                 }
-
                 return;
             }
         }
-
         //on update, collect the cols array and apply it to the header
         this.on('update', function () {
             //loops the 1st to get the content of columns
@@ -273,9 +254,6 @@
                             arr.push(obj);
                         }
                         self.cols = arr.slice();
-
-                        console.log(new Date());
-
                         var style = document.createElement('style');
                         style.type = 'text/css';
                         style.innerHTML = '.rg-selectedRow { background-color: ' + self.selectedRowColor + ' !important; }'
@@ -286,12 +264,10 @@
                 }
             }
         })
-
         //reformat the grid and the value in td
         this.on('updated', function () {
             self.reformatGrid();
         })
-
         //get the item from grid base on key value
         this.item = function (itemKey) {
             for (var d in self.gridData) {
@@ -301,14 +277,11 @@
                 }
             }
         }
-
         //row click event
         this.rowClicked = function (e) {
             self.Item = e.item.e;
             self.trigger('rowClicked', self.Item);
-
             var obj = e.target;
-
             var cell = {
                 item: self.Item,
                 cell: obj
@@ -319,11 +292,9 @@
                 self.trigger('chkClicked', cell);
             }
         }
-
         //row and cell doubleclick
         this.rowDbClick = function (e) {
             self.trigger('rowDbClick', self.Item);
-
             var obj = e.target;
             var cell = {
                 item: self.Item,
@@ -331,7 +302,6 @@
             }
             self.trigger('cellDbClick', cell);
         }
-
         //button clicked
         this.btnClicked = function (e) {
             var item = self.Item;
@@ -340,7 +310,6 @@
             }
             self.trigger(e.item.triggerName, item);
         }
-
         //show filters
         this.btnShowFilters = function () {
             if (self.showFilters) {
@@ -349,20 +318,15 @@
             }
             self.showFilters = !self.showFilters;
         }
-
         //filter some data
         this.filterData = function (e) {
             self.data = self.rawData.slice();
-
             if (self.data.length > 0) {
-
                 //get inputs
                 var txt = self.root.getElementsByClassName('input-filter');
                 for (var i = 0; i < txt.length; i++) {
-
                     var n = txt[i].getAttribute('data-field');
                     var s = txt[i].value.toLowerCase();
-
                     if (s.length > 0) {
                         self.data = new jinqJs()
                             .from(self.data)
@@ -372,26 +336,21 @@
                     }
                 }
             }
-
             self.getPages();
         }
-
         //export
         this.btnExportClicked = function (e) {
             self.exportCSV(self.data, self.gridName, true);
         }
-
         //clear the search, return raw data
         this.btnClearSearchClicked = function () {
             self.data = self.rawData.slice();
             self.txtSearch.value = '';
             self.getPages();
         }
-
         //search condition is OR
         //need enhacement on this part
         this.btnSearchClicked = function () {
-
             self.data = self.rawData.slice();
             //search by text
             var s = self.txtSearch.value.toLowerCase();
@@ -410,14 +369,11 @@
                                     }
                                 }
                             }
-
                             return bl;
                         }).select();
             }
-
             self.getPages();
         }
-
         //get pages number and its list
         this.getPages = function () {
             self.pages = [];
@@ -426,10 +382,8 @@
             for (var i = 0; i < pageCount; i++) {
                 self.pages.push({ pageNo: i });
             }
-
             self.pageChanged();
         }
-
         //sort data by field name
         this.sortData = function (e) {
             if (self.data.length > 0) {
@@ -441,19 +395,16 @@
                     self.sorted.field = n;
                     self.sorted.sort = 'asc';
                 }
-
                 var sortlist = [];
                 sortlist.push(self.sorted);
-
                 //using jinqJS to sort data
                 self.data = new jinqJs()
-                           .from(self.data)
-                           .orderBy(sortlist)
-                           .select();
+                            .from(self.data)
+                            .orderBy(sortlist)
+                            .select();
             }
             self.pageChanged();
         }
-
         //convert json to array
         this.jsonToArray = function (res) {
             if (res != null) {
@@ -466,13 +417,11 @@
                 //no data?
             }
         }
-
         //page changed by cbo
         this.cboPagesChanged = function () {
             self.selectedPage = self.cboPages.value;
             self.pageChanged();
         }
-
         //page change event
         this.pageChanged = function () {
             self.gridData = [];
@@ -481,43 +430,36 @@
                                                 (self.selectedPage * self.listCount) + self.listCount);
                 //add row number
                 for (var i = 0; i < self.gridData.length; i++) {
-                    self.gridData[i].rowNo =  (self.selectedPage * self.listCount) + i + 1;
+                    self.gridData[i].rowNo = (self.selectedPage * self.listCount) + i + 1;
                 }
             }
-
             self.Item = null;
             self.trigger('pageChanged', self.selectedPage + 1);
             if (self.cols.length == 0)
                 self.update();
-
         }
-
         //prev rec
         this.btnPreRecordClicked = function () {
             self.selectedPage = self.selectedPage - 1;
             if (self.selectedPage < 0) self.selectedPage = 0;
             self.pageChanged();
         }
-
         //first rec
         this.btnFirstRecordClicked = function () {
             self.selectedPage = 0;
             self.pageChanged();
         }
-
         //last rec
         this.btnLastRecordClicked = function () {
             self.selectedPage = self.pages.length - 1;
             self.pageChanged();
         }
-
         //next rec
         this.btnNextRecordClicked = function () {
             self.selectedPage = self.selectedPage + 1;
             if (self.selectedPage > self.pages.length) self.selectedPage = self.pages.length;
             self.pageChanged();
         }
-
         //reformat td
         this.rgFormat = function (txt, format, dec, sym) {
             var val = txt;
@@ -542,13 +484,20 @@
                         break;
                 }
             }
-
             return val;
         }
-
     </script>
 
     <style scoped>
+        .rg-show-more {
+            overflow-y: auto !important;
+            overflow-x: hidden;
+            max-height: 200px;
+            min-height: 30px;
+            white-space: normal !important;
+            display: block;
+        }
+
         a {
             cursor: pointer;
         }
@@ -620,8 +569,6 @@
             margin: 0px;
         }
 
-        
-
         ::-webkit-scrollbar {
             width: 0.5em;
             height: 0.5em;
@@ -643,8 +590,8 @@
             padding-right: 5px;
         }
 
-        .rg-table tbody{
-            overflow-y: scroll
+        .rg-table tbody {
+            overflow-y: scroll;
         }
 
         .rg-table {
@@ -662,20 +609,25 @@
             .rg-table th {
                 text-align: center;
                 background-color: black;
-                color: yellow;
-
+                color: yellow !important;
             }
 
-            .rg-table th.resizing {
-                cursor: col-resize;
-            }
+                .rg-table th a {
+                    color: yellow !important;
+                }
 
-            .rg-table th input {
-                width: 100%;
-                max-width: 100%;
-                background-color: yellow;
-                border: 0.01em solid #808080;
-            }
+                .rg-table th.resizing {
+                    cursor: col-resize;
+                }
+
+                .rg-table th input {
+                    width: 100%;
+                    max-width: 100%;
+                    background-color: lightyellow;
+                    border: 0.01em solid #808080;
+                    color: black;
+                    font-weight: normal;
+                }
 
         .selectedRow {
             background-color: yellow !important;
@@ -689,8 +641,6 @@
             background-repeat: no-repeat;
             margin: 0 auto;
         }
-
-        
     </style>
 </rg>
 
@@ -713,7 +663,7 @@
 <rg-image>
     <script>
         this.on('update', function myfunction() {
-            this.root.innerHTML = '<img src="' + opts.content + '" onerror="this.src\=\'' + 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' + '\'; " />';
+            this.root.innerHTML = '<img style="max-height:100%; max-width:100%;" src="' + opts.content + '" onerror="this.src\=\'' + 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' + '\'; " />';
         })
     </script>
 </rg-image>
