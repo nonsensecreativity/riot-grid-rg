@@ -33,14 +33,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css} {rg-selectedRow: Item[key] == e[key], rg-altRow: (index % 2 == 1)}"
+                            <tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css} {rg-selectedRow: (rgSelectedRow[key] && e[key] && rgSelectedRow[key] == e[key]), rg-altRow: (index % 2 == 1)}"
                                 ondblclick="{ rowDbClick }" onclick="{ rowClicked }"></tr>
-
-                            <!--<tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css}"
-                                onMouseOver="this.style.backgroundColor = '{hoverRowColor}'"
-                                onMouseOut="this.style.backgroundColor = '{(Item && Item[key] == e[key]) ? selectedRowColor : ((index%2==0) ? altRowColor : rowColor)}'"
-                                style="background-color:{(Item && Item[key] == e[key]) ? selectedRowColor : ((index % 2 == 0) ? altRowColor : rowColor)};" ondblclick="{ rowDbClick }" onclick="{ rowClicked }"></tr>-->
-
                         </tbody>
                     </table>
                 </div>
@@ -50,7 +44,7 @@
         <!--footer-->
         <div class="riotGridFooter  {bottomPanelCss}">
             <div class="btnLeft {topPanelBkgColor}">
-                <div class="btnGroup" show="{Item}">
+                <div class="btnGroup" show="{rgSelectedRow}">
                     <button each="{buttonLefts}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}">{btnName}</button>
                 </div>
             </div>
@@ -73,7 +67,7 @@
                 </button>
             </div>
             <div class="btnRight">
-                <div class="btnGroup" show="{Item}">
+                <div class="btnGroup" show="{rgSelectedRow}">
                     <button each="{buttonRights}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}">{btnName}</button>
                 </div>
             </div>
@@ -87,7 +81,7 @@
         this.gridData = [];
         this.pages = [];
         this.sorted = { field: 'ID', sort: 'desc' };
-        this.Item = null;
+        this.rgSelectedRow = null;
         this.showFilters = false;
         this.rowNoWidth = 30;
         this.buttonLefts = [];
@@ -110,7 +104,7 @@
         this.press = false;
         this.moving = false;
         this.key = 'ID';
-        this.allowResizeCol = false;
+        this.allowResizeCol = true;
         //some title setups
         this.addNewBtnText = 'Add New';
         this.showFilterBtnText = 'Show Filters';
@@ -135,6 +129,7 @@
         var self = this;
         var startX, startWidth, col;
         var self = this;
+
         this.loadData = function (data, options) {
             //self.cols = headers;
             //update properties
@@ -158,6 +153,7 @@
             self.jsonToArray(data);
             self.update();
         }
+
         //mouse move and mouse up
         this.mouseEventInit = function () {
             if (self.allowResizeCol) {
@@ -193,6 +189,7 @@
                 }, false);
             }
         }
+
         //col mousedown
         this.mousedown = function (e) {
             if (self.allowResizeCol) {
@@ -205,9 +202,11 @@
                 self.mouseEventInit();
             }
         }
+
         this.btnAddNewClicked = function () {
             self.trigger('add', null);
         }
+
         //reformat the grid
         this.reformatGrid = function () {
             var riotGridBodyDetail = this.root.getElementsByClassName("riotGridBodyDetail")[0];
@@ -279,11 +278,11 @@
         }
         //row click event
         this.rowClicked = function (e) {
-            self.Item = e.item.e;
-            self.trigger('rowClicked', self.Item);
+            self.rgSelectedRow = e.item.e;
+            self.trigger('rowClicked', self.rgSelectedRow);
             var obj = e.target;
             var cell = {
-                item: self.Item,
+                item: self.rgSelectedRow,
                 cell: obj
             }
             self.trigger('cellClicked', cell);
@@ -294,17 +293,17 @@
         }
         //row and cell doubleclick
         this.rowDbClick = function (e) {
-            self.trigger('rowDbClick', self.Item);
+            self.trigger('rowDbClick', self.rgSelectedRow);
             var obj = e.target;
             var cell = {
-                item: self.Item,
+                item: self.rgSelectedRow,
                 cell: obj
             }
             self.trigger('cellDbClick', cell);
         }
         //button clicked
         this.btnClicked = function (e) {
-            var item = self.Item;
+            var item = self.rgSelectedRow;
             if (e.item.type == 'checkbox' || e.item.type == 'radio') {
                 item.checked = e.target.checked;
             }
@@ -433,7 +432,7 @@
                     self.gridData[i].rowNo = (self.selectedPage * self.listCount) + i + 1;
                 }
             }
-            self.Item = null;
+            self.rgSelectedRow = null;
             self.trigger('pageChanged', self.selectedPage + 1);
             if (self.cols.length == 0)
                 self.update();
