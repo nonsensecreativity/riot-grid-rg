@@ -33,7 +33,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css} {rg-selectedRow: (rgSelectedRow[key] && e[key] && rgSelectedRow[key] == e[key]), rg-altRow: (index % 2 == 1)}"
+                            <tr data-is="rg-cells" each="{e, index in gridData}" class="{e.css} {rg-selectedRow: JSON.stringify(rgSelectedRow) === JSON.stringify(e), rg-altRow: (index % 2 == 1)}"
                                 ondblclick="{ rowDbClick }" onclick="{ rowClicked }"></tr>
                         </tbody>
                     </table>
