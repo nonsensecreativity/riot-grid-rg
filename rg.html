@@ -104,7 +104,7 @@
         this.press = false;
         this.moving = false;
         this.key = 'ID';
-        this.allowResizeCol = true;
+        this.allowResizeCol = false;
         //some title setups
         this.addNewBtnText = 'Add New';
         this.showFilterBtnText = 'Show Filters';
@@ -126,6 +126,7 @@
         this.headerCss = null;
         this.bottomPanelCss = null;
         this.topPanelCss = null;
+
         var self = this;
         var startX, startWidth, col;
         var self = this;
@@ -599,8 +600,8 @@
         }
 
             .rg-table td, th {
-                border: 1px solid #eee;
-                padding: 3px;
+                border: 0.01em solid #979696;
+                padding: 5px;
                 overflow: hidden;
                 white-space: nowrap;
             }
