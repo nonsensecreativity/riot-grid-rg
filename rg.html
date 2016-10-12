@@ -45,7 +45,9 @@
         <div class="riotGridFooter  {bottomPanelCss}">
             <div class="btnLeft {topPanelBkgColor}">
                 <div class="btnGroup" show="{rgSelectedRow}">
-                    <button each="{buttonLefts}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}">{btnName}</button>
+                    <button each="{buttonLefts}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}">
+                        <i class="{icon}" show="{icon}" />&nbsp;{btnName}
+                    </button>
                 </div>
             </div>
             <div class="paging">
@@ -68,7 +70,9 @@
             </div>
             <div class="btnRight">
                 <div class="btnGroup" show="{rgSelectedRow}">
-                    <button each="{buttonRights}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}">{btnName}</button>
+                    <button each="{buttonRights}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}">
+                        <i class="{icon}" show="{icon}" />&nbsp;{btnName}
+                    </button>
                 </div>
             </div>
         </div>
@@ -97,10 +101,10 @@
         this.allowSearch = true;
         this.allowFilters = true;
         this.buttons = [
-                   { btnName: 'View', triggerName: 'select' },
-                   { btnName: 'Delete', triggerName: 'del', buttonPosition: 'right' },
-                   { btnName: 'Edit', triggerName: 'edit' }
+            { btnName: 'Edit', triggerName: 'edit', icon: 'glyphicon glyphicon-pencil' },
+            { btnName: 'Delete', triggerName: 'del', icon: 'glyphicon glyphicon-trash' }
         ]; //some def buttons
+
         this.press = false;
         this.moving = false;
         this.key = 'ID';
@@ -126,6 +130,7 @@
         this.headerCss = null;
         this.bottomPanelCss = null;
         this.topPanelCss = null;
+        this.cellTag = 'rg-cells'; //waiting for riot version 3.0 for dynamic data-is
 
         var self = this;
         var startX, startWidth, col;
@@ -138,6 +143,7 @@
             for (var d in obj) {
                 self[d] = obj[d];
             }
+
             //reformat the buttons
             self.buttonLefts = [];
             self.buttonRights = [];
@@ -331,7 +337,9 @@
                         self.data = new jinqJs()
                             .from(self.data)
                             .where(function (row) {
-                                return row[n].toString().toLowerCase().indexOf(s) >= 0;
+                                if (row[n]) {
+                                    return row[n].toString().toLowerCase().indexOf(s) >= 0 || row[n].toString().toLowerCase() == s;
+                                }
                             }).select();
                     }
                 }
