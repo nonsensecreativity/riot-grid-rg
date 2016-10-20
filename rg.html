@@ -7,7 +7,7 @@
                 <button type="button" onclick="{ btnSearchClicked }"><i class="glyphicon glyphicon-search" />&nbsp;{searchBtnText}</button>
                 <button type="button" onclick="{ btnClearSearchClicked }"><i class="glyphicon glyphicon-remove" />&nbsp;{clearSearchBtnText}</button>
             </span>
-            <button type="button" if="{allowAddNew==true}" onclick="{ btnAddNewClicked }">{addNewBtnText}</button>
+            <!--<button type="button" if="{allowAddNew==true}" onclick="{ btnAddNewClicked }">{addNewBtnText}</button>-->
             <button type="button" if="{allowExport==true}" onclick="{ btnExportClicked }">{exportBtnText}</button>
             <button type="button" onclick="{ btnShowFilters }" if="{allowFilters==true}">
                 <i class="glyphicon glyphicon-filter" />&nbsp;{showFilters==true? hideFilterBtnText: showFilterBtnText}
@@ -20,7 +20,7 @@
         <div class="riotGridBody">
             <div>
                 <div class="riotGridBodyDetail">
-                    <table class="rg-table tableBody">
+                    <table class="rg-table tableBody" if="{!useYield}">
                         <thead>
                             <!--cols header-->
                             <tr>
@@ -37,15 +37,19 @@
                                 ondblclick="{ rowDbClick }" onclick="{ rowClicked }"></tr>
                         </tbody>
                     </table>
+
+                    <div if="{useYield}">
+                        <yield></yield>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!--footer-->
         <div class="riotGridFooter  {bottomPanelCss}">
-            <div class="btnLeft {topPanelBkgColor}">
-                <div class="btnGroup" show="{rgSelectedRow}">
-                    <button each="{buttonLefts}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}">
+            <div class="rg-footer-btn-left {topPanelBkgColor}">
+                <div class="rg-footer-btn-grp">
+                    <button each="{buttonLefts}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}" show="{rgSelectedRow || alwaysShow==true}">
                         <i class="{icon}" show="{icon}" />&nbsp;{btnName}
                     </button>
                 </div>
@@ -68,9 +72,9 @@
                     <strong>{lastBtnText}</strong>
                 </button>
             </div>
-            <div class="btnRight">
-                <div class="btnGroup" show="{rgSelectedRow}">
-                    <button each="{buttonRights}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}">
+            <div class="rg-footer-btn-right">
+                <div class="rg-footer-btn-grp">
+                    <button each="{buttonRights}" type="button" class="{css}" data-field="{value}" onclick="{ btnClicked }" name="{name}" show="{rgSelectedRow || alwaysShow==true}">
                         <i class="{icon}" show="{icon}" />&nbsp;{btnName}
                     </button>
                 </div>
@@ -101,6 +105,7 @@
         this.allowSearch = true;
         this.allowFilters = true;
         this.buttons = [
+            { btnName: 'Add New', triggerName: 'add', icon: 'glyphicon glyphicon-plus', alwaysShow: true },
             { btnName: 'Edit', triggerName: 'edit', icon: 'glyphicon glyphicon-pencil' },
             { btnName: 'Delete', triggerName: 'del', icon: 'glyphicon glyphicon-trash' }
         ]; //some def buttons
@@ -131,6 +136,7 @@
         this.bottomPanelCss = null;
         this.topPanelCss = null;
         this.cellTag = 'rg-cells'; //waiting for riot version 3.0 for dynamic data-is
+        this.useYield = false;
 
         var self = this;
         var startX, startWidth, col;
@@ -244,7 +250,7 @@
             //loops the 1st to get the content of columns
             if (self.cols.length == 0) {
                 var arr = [];
-                var a = document.getElementsByClassName('tableBody')[0];
+                var a = self.root.getElementsByClassName('tableBody')[0];
                 if (a) {
                     a = a.getElementsByTagName('tbody')[0];
                     a = a.getElementsByTagName('tr')[0];
@@ -266,6 +272,7 @@
                                             + '\n .rg-table tr:hover { background-color: ' + self.hoverRowColor + '; }'
                                             + '\n .rg-altRow { background-color: ' + self.altRowColor + '; }';
                         document.getElementsByTagName('head')[0].appendChild(style);
+                        //self.appendChild(style);
                     }
                 }
             }
@@ -373,7 +380,7 @@
                                     var val = row[self.cols[c].id];
                                     if (val) {
                                         val = val.toString().toLowerCase();
-                                        bl = (val.indexOf(s) >= 0) ? true : false;
+                                        bl = (val.indexOf(s) >= 0 || val == s) ? true : false;
                                     }
                                 }
                             }
@@ -517,14 +524,14 @@
             width: 33.33%;
         }
 
-        .btnRight {
+        .rg-footer-btn-right {
             display: table-cell;
             align-content: flex-end;
             width: 33.33%;
             text-align: right;
         }
 
-        .btnLeft {
+        .rg-footer-btn-left {
             display: table-cell;
             align-content: flex-start;
             width: 33.33%;
