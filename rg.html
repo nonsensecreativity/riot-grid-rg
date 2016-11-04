@@ -107,7 +107,8 @@
         this.buttons = [
             { btnName: 'Add New', triggerName: 'add', icon: 'glyphicon glyphicon-plus', alwaysShow: true },
             { btnName: 'Edit', triggerName: 'edit', icon: 'glyphicon glyphicon-pencil' },
-            { btnName: 'Delete', triggerName: 'del', icon: 'glyphicon glyphicon-trash' }
+            { btnName: 'Delete', triggerName: 'del', icon: 'glyphicon glyphicon-trash' },
+            { btnName: '', triggerName: 'help', icon: 'glyphicon glyphicon-question-sign', alwaysShow: true, buttonPosition: 'right' },
         ]; //some def buttons
 
         this.press = false;
@@ -351,6 +352,7 @@
                     }
                 }
             }
+            self.trigger('filtered', self.data);
             self.getPages();
         }
         //export
@@ -387,6 +389,7 @@
                             return bl;
                         }).select();
             }
+            self.trigger('searched', self.data);
             self.getPages();
         }
         //get pages number and its list
